@@ -1,16 +1,27 @@
 'use client'
 
-import { useState } from 'react'
-
-const tabs = [
-  { id: 'summary', label: 'Summary Notes' },
-  { id: 'transcript', label: 'Transcript' },
-]
+import { useMemo, useState } from 'react'
+import MindMap from '@/components/MindMap'
 
 export default function NotesTabs({ summary, transcript }) {
-  const [activeTab, setActiveTab] = useState('summary')
+  const hasSummary = Boolean(summary?.trim())
+  const hasTranscript = Boolean(transcript?.trim())
+
+  const tabs = useMemo(() => {
+    const base = []
+    if (hasSummary) base.push({ id: 'summary', label: 'Summary Notes' })
+    if (hasTranscript) base.push({ id: 'transcript', label: 'Transcript' })
+    if (hasSummary) base.push({ id: 'mindmap', label: 'Mind Map' })
+    return base.length ? base : [{ id: 'empty', label: 'Notes' }]
+  }, [hasSummary, hasTranscript])
+
+  const [activeTab, setActiveTab] = useState(tabs[0]?.id ?? 'empty')
 
   const renderContent = () => {
+    if (activeTab === 'mindmap') {
+      return <MindMap summary={summary} />
+    }
+
     const content = activeTab === 'summary' ? summary : transcript
 
     if (!content) {

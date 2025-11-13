@@ -63,6 +63,7 @@ cp .env.example .env
 
 Edit `.env` and add:
 - `GEMINI_API_KEY` - Your Gemini API key from Google AI Studio
+- `GEMINI_MODEL` - (Optional) Override Gemini model, e.g. `models/gemini-2.0-flash`
 - `DATABASE_URL` - Your Neon PostgreSQL connection string
 - `LOCAL_WHISPER_PATH` - (Optional) Path to Whisper if not in PATH
 - `PYTHON_PATH` - (Optional) Path to Python executable if not in PATH
@@ -117,8 +118,8 @@ note-genie/
 This project is being built in phases:
 
 - ✅ **Phase 1**: Setup & Configuration
-- ⏳ **Phase 2**: Core MVP (Upload → Transcribe → Summarize → Store → Display)
-- ⏳ **Phase 3**: Mind Map Visualization
+- ✅ **Phase 2**: Core MVP (Upload → Transcribe → Summarize → Store → Display)
+- ✅ **Phase 3**: Mind Map Visualization
 - ⏳ **Phase 4**: Quiz Generation & Storage
 - ⏳ **Phase 5**: Q&A Chat
 - ⏳ **Phase 6**: Flashcards Mode
