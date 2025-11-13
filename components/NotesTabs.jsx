@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import MindMap from '@/components/MindMap'
+import MermaidMindMap from '@/components/MermaidMindMap'
 
 export default function NotesTabs({ summary, transcript }) {
   const hasSummary = Boolean(summary?.trim())
@@ -19,7 +19,7 @@ export default function NotesTabs({ summary, transcript }) {
 
   const renderContent = () => {
     if (activeTab === 'mindmap') {
-      return <MindMap summary={summary} />
+      return <MermaidMindMap summary={summary} />
     }
 
     const content = activeTab === 'summary' ? summary : transcript

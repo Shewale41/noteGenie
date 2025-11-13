@@ -8,7 +8,7 @@
 - 🎤 **Auto-Transcribe** - Transcribe using local Whisper
 - 🤖 **AI Summarization** - Generate structured notes using Gemini API
 - 💾 **Persistent Storage** - Store transcripts and summaries in Neon PostgreSQL
-- 🗺️ **Mind Maps** - Visualize notes as interactive topic mind maps
+- 🗺️ **Mind Maps** - Visualize notes as Mermaid.js diagrams with export capabilities
 - 📝 **Quiz Generator** - Auto-generate quizzes from notes with results tracking
 - 💬 **Q&A Chat** - Ask contextual questions about your notes
 - 🧠 **Flashcards** - Generate Q/A flashcards for self-revision
@@ -21,7 +21,7 @@
 - **AI Summarization**: Gemini API
 - **Database**: Neon PostgreSQL
 - **Media Processing**: FFmpeg
-- **Visualization**: React Flow
+- **Visualization**: Mermaid.js (diagrams), html-to-image (export)
 
 ## 📋 Prerequisites
 
@@ -108,7 +108,11 @@ note-genie/
 │   ├── db.js
 │   ├── gemini.js
 │   ├── ffmpeg.js
-│   └── langchain.js
+│   ├── langchain.js
+│   └── mermaid.js          → Mermaid diagram generator
+├── components/
+│   ├── MermaidMindMap.jsx   → Mermaid visualization component
+│   └── ...
 └── public/
     └── temp/
 ```
@@ -119,14 +123,45 @@ This project is being built in phases:
 
 - ✅ **Phase 1**: Setup & Configuration
 - ✅ **Phase 2**: Core MVP (Upload → Transcribe → Summarize → Store → Display)
-- ✅ **Phase 3**: Mind Map Visualization
-- ⏳ **Phase 4**: Quiz Generation & Storage
-- ⏳ **Phase 5**: Q&A Chat
-- ⏳ **Phase 6**: Flashcards Mode
+- ✅ **Phase 3**: Mind Map Visualization (Mermaid.js)
+- ✅ **Phase 4**: Quiz Generation & Storage
+- ✅ **Phase 5**: Q&A Chat
+- ✅ **Phase 6**: Flashcards Mode
 
 ## 📝 License
 
 MIT
+
+## 🗺️ Mind Map Features
+
+The Mind Map tab uses **Mermaid.js** to convert lecture summaries into visual diagrams:
+
+### Usage
+1. Navigate to any lecture's notes page
+2. Click the **"Mind Map"** tab
+3. Click **"Generate Mind Map"** to auto-generate from summary
+4. Click **"Render"** to display the diagram
+5. Edit the Mermaid code directly if needed
+6. Export as PNG or SVG for sharing
+
+### Mermaid Diagram Features
+- **Auto-generation**: Converts Markdown headings and bullets into graph nodes
+- **Editable**: Modify the Mermaid code directly in the textarea
+- **Orientation**: Toggle between Top-Down (TD) and Left-Right (LR) layouts
+- **Export**: Download diagrams as PNG or SVG images
+- **Copy**: Copy Mermaid code to clipboard for use in other tools
+
+### Parsing Heuristics
+The converter (`lib/mermaid.js`) uses deterministic rules:
+- **Headings** (`##`, `###`) → Parent nodes
+- **Bullet points** (`-`, `*`) → Child nodes
+- **Long text** → Automatically truncated for readability
+- **Fallback**: If no headings found, chunks content into sections
+
+### Sample Summaries
+Demo summaries are available in `public/sample-summaries/`:
+- `data-structures.md` - Example with clear headings and bullets
+- `ai-fundamentals.md` - Example with multiple sections
 
 ## 🤝 Contributing
 
