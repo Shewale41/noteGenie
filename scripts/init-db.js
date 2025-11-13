@@ -39,6 +39,25 @@ CREATE TABLE IF NOT EXISTS notes (
   summary_text TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS quizzes (
+  id SERIAL PRIMARY KEY,
+  lecture_id INT REFERENCES lectures(id) ON DELETE CASCADE,
+  question TEXT NOT NULL,
+  options JSONB NOT NULL,
+  correct_option TEXT NOT NULL,
+  explanation TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS quiz_results (
+  id SERIAL PRIMARY KEY,
+  lecture_id INT REFERENCES lectures(id) ON DELETE CASCADE,
+  quiz_id INT REFERENCES quizzes(id) ON DELETE CASCADE,
+  selected_option TEXT NOT NULL,
+  is_correct BOOLEAN NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 `
 
 async function init() {

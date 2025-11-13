@@ -65,6 +65,17 @@ export default async function LectureNotesPage({ params }) {
             })}
           </p>
 
+          {lecture.summary && (
+            <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
+              <Link
+                href={`/quiz/${lecture.id}`}
+                className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-100"
+              >
+                Practice Quiz →
+              </Link>
+            </div>
+          )}
+
           <NotesTabs summary={lecture.summary} transcript={lecture.transcript} />
         </div>
       </div>
