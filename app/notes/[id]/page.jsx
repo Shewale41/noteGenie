@@ -79,6 +79,12 @@ export default async function LectureNotesPage({ params }) {
               >
                 Ask Questions →
               </Link>
+              <Link
+                href={`/flashcards/${lecture.id}`}
+                className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-4 py-2 text-sm font-semibold text-purple-700 hover:bg-purple-100"
+              >
+                Flashcards →
+              </Link>
             </div>
           )}
 

@@ -58,6 +58,14 @@ CREATE TABLE IF NOT EXISTS quiz_results (
   is_correct BOOLEAN NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS flashcards (
+  id SERIAL PRIMARY KEY,
+  lecture_id INT REFERENCES lectures(id) ON DELETE CASCADE,
+  front_text TEXT NOT NULL,
+  back_text TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 `
 
 async function init() {
