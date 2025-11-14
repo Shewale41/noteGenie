@@ -18,7 +18,7 @@ const formatDate = (date) =>
     second: 'numeric',
   }).format(date)
 
-export default function UploadForm() {
+export default function UploadForm({ onSuccess }) {
   const router = useRouter()
   const fileInputRef = useRef(null)
   const [dragActive, setDragActive] = useState(false)
@@ -169,6 +169,13 @@ export default function UploadForm() {
       })
 
       router.refresh()
+      
+      // Close modal after a short delay if onSuccess callback is provided
+      if (onSuccess) {
+        setTimeout(() => {
+          onSuccess()
+        }, 2000)
+      }
     } catch (err) {
       console.error(err)
       setError(err.message || 'Processing failed. Please try again.')
@@ -180,10 +187,10 @@ export default function UploadForm() {
     } finally {
       setIsProcessing(false)
     }
-  }, [router, selectedFile, updateStepStatus])
+  }, [router, selectedFile, updateStepStatus, onSuccess])
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8">
+    <div className="bg-white rounded-2xl p-8">
       <div
         className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${dragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 bg-gray-50'}`}
         onDragOver={(event) => {
@@ -209,7 +216,7 @@ export default function UploadForm() {
         <button
           type="button"
           onClick={onBrowseClick}
-          className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 transition"
+          className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 transition cursor-pointer"
         >
           Browse Files
         </button>
@@ -288,7 +295,7 @@ export default function UploadForm() {
           </div>
           <a
             href={`/notes/${result.lectureId}`}
-            className="mt-4 inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 transition"
+            className="mt-4 inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 transition cursor-pointer"
           >
             View Notes
           </a>
