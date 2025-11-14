@@ -138,16 +138,68 @@ export default function MermaidMindMap({ summary }) {
 
     try {
       setIsExporting(true)
-      const dataUrl = await toPng(containerRef.current, {
-        quality: 1.0,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-      })
+      
+      // Find the SVG element (the actual diagram, not the container with controls)
+      const svgElement = containerRef.current.querySelector('svg')
+      if (!svgElement) {
+        throw new Error('SVG element not found')
+      }
 
-      const link = document.createElement('a')
-      link.download = `mindmap-${Date.now()}.png`
-      link.href = dataUrl
-      link.click()
+      // Get original SVG dimensions
+      const svgWidth = svgElement.viewBox?.baseVal?.width || svgElement.getAttribute('width') || 800
+      const svgHeight = svgElement.viewBox?.baseVal?.height || svgElement.getAttribute('height') || 600
+      
+      // Create a temporary container with just the SVG, no controls
+      const tempContainer = document.createElement('div')
+      tempContainer.style.position = 'absolute'
+      tempContainer.style.left = '-9999px'
+      tempContainer.style.width = `${svgWidth}px`
+      tempContainer.style.height = `${svgHeight}px`
+      tempContainer.style.backgroundColor = '#ffffff'
+      tempContainer.style.padding = '20px'
+      tempContainer.style.display = 'flex'
+      tempContainer.style.alignItems = 'center'
+      tempContainer.style.justifyContent = 'center'
+      
+      // Clone the SVG to avoid modifying the original
+      const clonedSvg = svgElement.cloneNode(true)
+      
+      // Ensure SVG has proper dimensions and remove any transforms
+      clonedSvg.setAttribute('width', svgWidth)
+      clonedSvg.setAttribute('height', svgHeight)
+      clonedSvg.removeAttribute('style') // Remove any inline styles that might affect rendering
+      
+      // Ensure text colors are preserved - check all text elements
+      const textElements = clonedSvg.querySelectorAll('text, tspan')
+      textElements.forEach((textEl) => {
+        const fill = textEl.getAttribute('fill')
+        // If fill is white or missing, set to dark color for visibility
+        if (!fill || fill === '#ffffff' || fill === 'white' || fill === '#fff') {
+          // Check if it's a root node (should stay white) or parent/child (should be dark)
+          const parent = textEl.closest('[class*="root"]')
+          if (!parent) {
+            textEl.setAttribute('fill', '#0f172a') // Dark color for visibility
+          }
+        }
+      })
+      
+      tempContainer.appendChild(clonedSvg)
+      document.body.appendChild(tempContainer)
+
+      try {
+        const dataUrl = await toPng(tempContainer, {
+          quality: 1.0,
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+        })
+
+        const link = document.createElement('a')
+        link.download = `mindmap-${Date.now()}.png`
+        link.href = dataUrl
+        link.click()
+      } finally {
+        document.body.removeChild(tempContainer)
+      }
     } catch (err) {
       console.error('PNG export failed:', err)
       alert('Failed to export PNG. Please try again.')
@@ -165,15 +217,50 @@ export default function MermaidMindMap({ summary }) {
 
     try {
       setIsExporting(true)
-      const dataUrl = await toSvg(containerRef.current, {
-        quality: 1.0,
-        backgroundColor: '#ffffff',
+      
+      // Find the SVG element
+      const svgElement = containerRef.current.querySelector('svg')
+      if (!svgElement) {
+        throw new Error('SVG element not found')
+      }
+
+      // Clone the SVG
+      const clonedSvg = svgElement.cloneNode(true)
+      
+      // Get original dimensions
+      const svgWidth = clonedSvg.viewBox?.baseVal?.width || clonedSvg.getAttribute('width') || 800
+      const svgHeight = clonedSvg.viewBox?.baseVal?.height || clonedSvg.getAttribute('height') || 600
+      
+      // Ensure proper dimensions
+      clonedSvg.setAttribute('width', svgWidth)
+      clonedSvg.setAttribute('height', svgHeight)
+      clonedSvg.removeAttribute('style') // Remove any inline styles
+      
+      // Ensure text colors are preserved - check all text elements
+      const textElements = clonedSvg.querySelectorAll('text, tspan')
+      textElements.forEach((textEl) => {
+        const fill = textEl.getAttribute('fill')
+        // If fill is white or missing, set to dark color for visibility
+        if (!fill || fill === '#ffffff' || fill === 'white' || fill === '#fff') {
+          // Check if it's a root node (should stay white) or parent/child (should be dark)
+          const parent = textEl.closest('[class*="root"]')
+          if (!parent) {
+            textEl.setAttribute('fill', '#0f172a') // Dark color for visibility
+          }
+        }
       })
+
+      // Convert to blob and download
+      const svgString = new XMLSerializer().serializeToString(clonedSvg)
+      const blob = new Blob([svgString], { type: 'image/svg+xml' })
+      const url = URL.createObjectURL(blob)
 
       const link = document.createElement('a')
       link.download = `mindmap-${Date.now()}.svg`
-      link.href = dataUrl
+      link.href = url
       link.click()
+      
+      URL.revokeObjectURL(url)
     } catch (err) {
       console.error('SVG export failed:', err)
       alert('Failed to export SVG. Please try again.')
@@ -369,9 +456,13 @@ export default function MermaidMindMap({ summary }) {
             onMouseLeave={handleMouseUp}
             style={{ cursor: isDragging ? 'grabbing' : renderedSvg ? 'grab' : 'default' }}
           >
-            {/* Zoom Controls - Inside the diagram box */}
+            {/* Zoom Controls - Inside the diagram box (excluded from exports) */}
             {renderedSvg && !isRendering && (
-              <div className="absolute top-3 right-3 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm border border-gray-300 rounded-lg shadow-lg p-2">
+              <div 
+                className="absolute top-3 right-3 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm border border-gray-300 rounded-lg shadow-lg p-2"
+                data-html2canvas-ignore="true"
+                style={{ pointerEvents: 'auto' }}
+              >
                 <button
                   type="button"
                   onClick={(e) => {

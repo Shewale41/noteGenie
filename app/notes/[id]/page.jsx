@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import NotesTabs from '@/components/NotesTabs'
+import ExportPDFButton from '@/components/ExportPDFButton'
 import { query } from '@/lib/db'
 
 export default async function LectureNotesPage({ params }) {
@@ -53,7 +54,7 @@ export default async function LectureNotesPage({ params }) {
           </span>
         </div>
 
-        <div className="bg-white/80 backdrop-blur rounded-3xl shadow-xl border border-white/60 p-8">
+        <div className="bg-white/80 backdrop-blur rounded-3xl shadow-xl border border-white/60 p-8" data-notes-content>
           <h1 className="text-3xl font-bold text-gray-900">
             {lecture.title || 'Untitled Lecture'}
           </h1>
@@ -67,6 +68,7 @@ export default async function LectureNotesPage({ params }) {
 
           {lecture.summary && (
             <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
+              <ExportPDFButton lecture={lecture} summary={lecture.summary} transcript={lecture.transcript} />
               <Link
                 href={`/quiz/${lecture.id}`}
                 className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-100"

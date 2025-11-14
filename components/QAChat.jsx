@@ -2,6 +2,68 @@
 
 import { useCallback, useRef, useState } from 'react'
 
+// Format markdown to HTML
+const formatMarkdown = (text) => {
+  if (!text) return ''
+  
+  // Escape HTML first
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  
+  // Convert markdown to HTML
+  // Headers (must come before other formatting)
+  html = html
+    .replace(/^### (.*$)/gim, '<h3 class="font-semibold text-base mt-3 mb-2">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="font-bold text-lg mt-4 mb-2">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="font-bold text-xl mt-4 mb-2">$1</h1>')
+  
+  // Bold (must come before italic) - handle **text**
+  html = html.replace(/\*\*([^*]+?)\*\*/gim, '<strong class="font-semibold">$1</strong>')
+  
+  // Italic (only single asterisks, not part of bold) - simpler approach
+  // Replace single asterisks that aren't part of double asterisks
+  html = html.replace(/(^|[^*])\*([^*\n]+?)\*([^*]|$)/gim, '$1<em>$2</em>$3')
+  
+  // Bullet points and lists
+  const lines = html.split('\n')
+  const processedLines = []
+  let inList = false
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const bulletMatch = line.match(/^(\*|-|\d+\.)\s+(.+)$/)
+    
+    if (bulletMatch) {
+      if (!inList) {
+        processedLines.push('<ul class="list-disc ml-6 my-2 space-y-1">')
+        inList = true
+      }
+      processedLines.push(`<li>${bulletMatch[2]}</li>`)
+    } else {
+      if (inList) {
+        processedLines.push('</ul>')
+        inList = false
+      }
+      if (line.trim()) {
+        processedLines.push(line)
+      }
+    }
+  }
+  
+  if (inList) {
+    processedLines.push('</ul>')
+  }
+  
+  html = processedLines.join('\n')
+  
+  // Line breaks
+  html = html.replace(/\n/g, '<br />')
+  
+  return html
+}
+
 export default function QAChat({ lecture }) {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -138,7 +200,13 @@ export default function QAChat({ lecture }) {
                   : 'bg-slate-100 text-slate-900'
               }`}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+              <div 
+                className="text-sm leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ 
+                  __html: formatMarkdown(message.content) 
+                }}
+                style={{ color: message.role === 'user' ? '#ffffff' : '#0f172a' }}
+              />
             </div>
           </div>
         ))}
@@ -172,7 +240,8 @@ export default function QAChat({ lecture }) {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about the lecture..."
             disabled={isLoading}
-            className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 disabled:bg-slate-50 disabled:text-slate-400"
+            className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-gray-900 bg-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 disabled:bg-slate-50 disabled:text-slate-400"
+            style={{ color: '#111827' }}
           />
           <button
             type="submit"
